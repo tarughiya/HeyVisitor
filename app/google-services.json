@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1094468388700",
+    "firebase_url": "https://heyvisitor-44b7c.firebaseio.com",
+    "project_id": "heyvisitor-44b7c",
+    "storage_bucket": "heyvisitor-44b7c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1094468388700:android:2c2ce9a79f07629a09e399",
+        "android_client_info": {
+          "package_name": "com.example.heyvisitor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1094468388700-265acnp6eh9l5rfs0l1gouj9d37jkb1h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.heyvisitor",
+            "certificate_hash": "c11e4ae36bec6c3e6218dfba1a796db47663c9ec"
+          }
+        },
+        {
+          "client_id": "1094468388700-ondib9f8r4052t0hp1irsj6en65echh2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDvNtHrDc0pQ0PJiFU4zwXeqg0Zn1UWuoc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1094468388700-ondib9f8r4052t0hp1irsj6en65echh2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
