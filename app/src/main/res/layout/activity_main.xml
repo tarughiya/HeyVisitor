@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/yellow">
 
     <TextView
         android:layout_width="wrap_content"
@@ -20,23 +21,30 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Who are you?"
-        android:layout_marginLeft="10dp"
-        android:textSize="15sp"
+        android:layout_gravity="center"
+        android:textSize="20sp"
         />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center"
+        >
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/visitor"
         android:text="Visitor"
-        android:layout_gravity="center_horizontal"
-        android:onClick="Visitorform"/>
+
+        android:onClick="Visitorform"
+        android:layout_marginTop="50dp"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/host"
         android:text="Host"
-        android:layout_gravity="center_horizontal"
-        android:onClick="Hostform"/>
-
+        android:onClick="Hostform"
+        android:layout_marginTop="50dp"/>
+    </LinearLayout>
 </LinearLayout>

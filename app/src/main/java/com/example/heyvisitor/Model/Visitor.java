@@ -9,16 +9,19 @@ public class Visitor {
     private int VNumber;
     private String localtime;
     private String role;
+    private String checkouttime;
 
 
 
 
-    public Visitor(String name, String email, int phone, String localtime , String role) {
+    public Visitor(String name, String email, int phone, String localtime , String role,String checkouttime) {
         this.VName = name;
         this.VEmail = email;
         this.VNumber= phone;
         this.localtime= localtime;
         this.role= role;
+        this.checkouttime= checkouttime;
+
     }
 
     public String getVName() {

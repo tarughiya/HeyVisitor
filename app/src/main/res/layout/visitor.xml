@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/yellow">
 
 
     <EditText
@@ -13,7 +14,9 @@
         android:layout_marginTop="100dp"
         android:inputType="textPersonName"
         android:hint="Name"
-        android:layout_marginBottom="10dp"/>
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"/>
 
     <EditText
         android:id="@+id/vemail"
@@ -25,6 +28,8 @@
         android:inputType="textEmailAddress"
         android:layout_marginBottom="10dp"
         android:textSize="20sp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
         />
 
     <EditText
@@ -32,23 +37,29 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="phone number"
+        android:hint="Phone number"
         android:inputType="phone"
         android:textSize="20sp"
-        android:layout_marginBottom="10dp"/>
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"/>
 
 
         <TextView
             android:id="@+id/vtextview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Choose your host" />
+            android:text="Choose your host"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"/>
 
         <Spinner
             android:id="@+id/hostname"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"/>
 
 
     <Button
@@ -57,7 +68,33 @@
         android:id="@+id/checkin"
         android:textSize="20sp"
         android:text="Checkin"
-        android:layout_gravity="center" />
+        android:layout_gravity="center"
+        android:layout_marginTop="30dp"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Checkout time"
+        android:inputType="time"
+        android:textSize="20sp"
+        android:layout_marginTop="100dp"
+        android:id="@+id/etcheckout"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="Checkout"
+        android:layout_gravity="center"
+        android:layout_marginTop="30dp"
+        android:id="@+id/checkout"
+        android:visibility="gone"/>
+
+
+
 
 
 </LinearLayout>
