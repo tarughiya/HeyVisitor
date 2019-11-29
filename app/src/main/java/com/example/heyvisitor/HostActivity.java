@@ -57,7 +57,7 @@ public class HostActivity extends AppCompatActivity {
             public void onClick(View v) {
                 final String Name = name.getText().toString().trim();
                 final String Email = email.getText().toString().trim();
-                final int Number = Integer.parseInt(phone.getText().toString());
+                final String Number =(phone.getText().toString());
 
                 if (Name.isEmpty() || Email.isEmpty()) {
                     AlertDialog.Builder alert = new AlertDialog.Builder(HostActivity.this);

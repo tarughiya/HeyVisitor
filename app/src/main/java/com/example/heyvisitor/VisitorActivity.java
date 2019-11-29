@@ -1,12 +1,17 @@
 package com.example.heyvisitor;
 
 import com.example.heyvisitor.Model.Host;
+
+import android.Manifest;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -21,6 +26,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 
 import com.example.heyvisitor.Model.Visitor;
@@ -57,6 +64,7 @@ import java.util.TimeZone;
 
 
 public class VisitorActivity extends AppCompatActivity {
+    private static final int MY_PERMISSIONS_REQUEST_SEND_SMS =0 ;
     EditText visitorName,visitorEmail,visitorPhone,etcheckout;
     Spinner hostname;
     Button checkIn,checkout;
@@ -93,7 +101,6 @@ public class VisitorActivity extends AppCompatActivity {
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                 progress.dismiss();
                 List<String> temp_host = new ArrayList<String>();
-                List<String> emailIds = new ArrayList<String>();
                 if(queryDocumentSnapshots!=null){
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                                 Log.d(TAG, document.getId() + " => " + document.getData());
@@ -105,17 +112,9 @@ public class VisitorActivity extends AppCompatActivity {
                         finish();
                     }
 
-                    else {
-                        List<Host> types = queryDocumentSnapshots.toObjects(Host.class);
-                        for (Host temp : types) {
-                            emailIds.add(temp.getEmail());
-                            //getting each email ID and storing in a list.
-                        }
-                    }
 
                     host.clear();
                     host.addAll(temp_host);
-                    host.addAll(emailIds);
                     areasAdapter.notifyDataSetChanged();
 
                 }
@@ -128,89 +127,98 @@ public class VisitorActivity extends AppCompatActivity {
 
         checkIn.setOnClickListener(new View.OnClickListener() {
 
-            @Override
-            public void onClick(View v) {
-                final String VName = visitorName.getText().toString().trim();
-                final String VEmail = visitorEmail.getText().toString().trim();
-                final int VNumber = Integer.parseInt(visitorPhone.getText().toString());
+                                       @Override
+                                       public void onClick(View v) {
+                                           final String VName = visitorName.getText().toString().trim();
+                                           final String VEmail = visitorEmail.getText().toString().trim();
+                                           final String VNumber = visitorPhone.getText().toString();
 
 
+                                           Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+5:30"));
+                                           Date currentLocalTime = cal.getTime();
+                                           DateFormat date = new SimpleDateFormat("HH:mm a");
+                                           date.setTimeZone(TimeZone.getTimeZone("GMT+5:30"));
 
-                Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+5:30"));
-                Date currentLocalTime = cal.getTime();
-                DateFormat date = new SimpleDateFormat("HH:mm a");
-                date.setTimeZone(TimeZone.getTimeZone("GMT+5:30"));
-
-                final String localTime = date.format(currentLocalTime);
-
+                                           final String localTime = date.format(currentLocalTime);
 
 
+                                           final String role = hostname.getSelectedItem().toString();
 
-                final String role = hostname.getSelectedItem().toString();
+                                           if (VName.isEmpty() || VEmail.isEmpty()) {
+                                               AlertDialog.Builder alert = new AlertDialog.Builder(VisitorActivity.this);
+                                               alert.setTitle("Failure");
+                                               alert.setMessage("Fill up all the fields!");
+                                               alert.show();
+                                           } else {
+                                               Map<String, Object> visitor = new HashMap<>();
+                                               visitor.put("Name", VName);
+                                               visitor.put("Email", VEmail);
+                                               visitor.put("Number", VNumber);
+                                               visitor.put("Time", localTime);
+                                               visitor.put("HostName", role);
 
-                if (VName.isEmpty() || VEmail.isEmpty()) {
-                    AlertDialog.Builder alert = new AlertDialog.Builder(VisitorActivity.this);
-                    alert.setTitle("Failure");
-                    alert.setMessage("Fill up all the fields!");
-                    alert.show();}
-                else
-                {
-                    Map<String, Object> visitor = new HashMap<>();
-                    visitor.put("Name", VName);
-                    visitor.put("Email", VEmail);
-                    visitor.put("Number",VNumber);
-                    visitor.put("Time",localTime);
-                    visitor.put("HostName",role);
-
-                    db.collection("Visitor")
-                            .add(visitor)
-                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                @Override
-                                public void onSuccess(DocumentReference documentReference) {
-                                    AlertDialog.Builder alert = new AlertDialog.Builder(VisitorActivity.this);
-                                    alert.setTitle("Success");
-                                    alert.setMessage("You're checked in! Please enter checkout time when checking out.");
-                                    alert.show();
-                                }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
+                                               db.collection("Visitor")
+                                                       .add(visitor)
+                                                       .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                                           @Override
+                                                           public void onSuccess(DocumentReference documentReference) {
+                                                               AlertDialog.Builder alert = new AlertDialog.Builder(VisitorActivity.this);
+                                                               alert.setTitle("Success");
+                                                               alert.setMessage("You're checked in! Please enter checkout time when checking out.");
+                                                               alert.show();
+                                                           }
+                                                       })
+                                                       .addOnFailureListener(new OnFailureListener() {
+                                                           @Override
+                                                           public void onFailure(@NonNull Exception e) {
 //                                    Log.w(TAG, "Error adding document", e);
-                                }
-                            });
-                }
+                                                           }
+                                                       });
+                                           }
 
-                db.collection("Host")
-                        .whereEqualTo("Name",role)
-                        .get()
-                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                if(task.isSuccessful())
-                                {
-                                    for (QueryDocumentSnapshot document : task.getResult()) {
-                                        Log.d(TAG, document.getId() + " => " + document.getData());
-                                    final String  em = document.getString("Email");
-
-
-                                        Intent intent = new Intent(Intent.ACTION_SENDTO);
-                                        intent.setData(Uri.parse("mailto:")); // only email apps should handle this
-                                        intent.putExtra(Intent.EXTRA_EMAIL, em);
-                                        intent.putExtra(Intent.EXTRA_SUBJECT, "Visitor Here!");
-                                        intent.putExtra(Intent.EXTRA_TEXT, "A visitor is here having details as follows:" +
-                                                " \n Name :" +VName+"\n Email:"+ VEmail+"\n Number:"+ VNumber );
-
-                                        if (intent.resolveActivity(getPackageManager()) != null) {
-                                            startActivity(intent);
-                                        }
-
-                                    }
-                                }
-                            }
-                        });
+                                           db.collection("Host")
+                                                   .whereEqualTo("Name", role)
+                                                   .get()
+                                                   .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                       @Override
+                                                       public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                           if (task.isSuccessful()) {
+                                                               for (QueryDocumentSnapshot document : task.getResult()) {
+                                                                   Log.d(TAG, document.getId() + " => " + document.getData());
+                                                                   final String em = document.getString("Email");
+                                                                   final String no = document.getString("Number");
 
 
+                                                                   Intent intent = new Intent(Intent.ACTION_SENDTO);
+                                                                   intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+                                                                   intent.putExtra(Intent.EXTRA_EMAIL, em);
+                                                                   intent.putExtra(Intent.EXTRA_SUBJECT, "Visitor Here!");
+                                                                   intent.putExtra(Intent.EXTRA_TEXT, "A visitor is here having details as follows:" +
+                                                                           " \n Name :" + VName + "\n Email:" + VEmail + "\n Number:" + VNumber);
+
+                                                                   if (intent.resolveActivity(getPackageManager()) != null) {
+                                                                       startActivity(intent);
+                                                                   }
+
+                                                                   //Getting intent and PendingIntent instance
+                                                                   Intent i = new Intent(getApplicationContext(), VisitorActivity.class);
+                                                                   PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0, i, 0);
+
+                                                                   //Get the SmsManager instance and call the sendTextMessage method to send message
+                                                                   SmsManager sms = SmsManager.getDefault();
+                                                                   sms.sendTextMessage(no, null, "A visitor is here having details as follows: \n" + "Name: " + VName + "\n Email: " +
+                                                                           VEmail + "\n Number: " + VNumber + "\n CheckIn time: " + localTime, pi, null);
+
+                                                                   Toast.makeText(getApplicationContext(), "Message Sent successfully!",
+                                                                           Toast.LENGTH_LONG).show();
+
+                                                               }
+                                                           }
+                                                       }
+                                                   });
+                                       }
+
+                                   });
 //                            String[] TO = {e};
 //                            String[] CC = {"tarughiya@gmail.com"};
 //                            Intent emailIntent = new Intent(Intent.ACTION_SEND);
@@ -235,75 +243,67 @@ public class VisitorActivity extends AppCompatActivity {
 //                    }
 
 
-
-
-           }
-            });
-
-
-        etcheckout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                TimePickerDialog timePickerDialog = new TimePickerDialog(VisitorActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                etcheckout.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onTimeSet(TimePicker timePicker, int hourOfDay, int minutes) {
+                    public void onClick(View v) {
+
+                        TimePickerDialog timePickerDialog = new TimePickerDialog(VisitorActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                            @Override
+                            public void onTimeSet(TimePicker timePicker, int hourOfDay, int minutes) {
 
 
-                        etcheckout.setText(hourOfDay + ":" + minutes);
+                                etcheckout.setText(hourOfDay + ":" + minutes);
+                            }
+                        }, 0, 0, false);
+                        timePickerDialog.show();
+                        checkout.setVisibility(View.VISIBLE);
+
                     }
-                }, 0, 0, false);
-                timePickerDialog.show();
-                checkout.setVisibility(View.VISIBLE);
 
-            }
-
-        });
+                });
 
 
-        checkout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+                checkout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
 
 
-
-                    db.collection("Visitor")
-                            .get()
-                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                @Override
-                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                    if(task.isSuccessful())
-                                    {
-                                        for (QueryDocumentSnapshot document : task.getResult()) {
-                                            Log.d(TAG, document.getId() + " => " + document.getData());
-                                            final String vem = document.getString("Email");
-                                            final String n = document.getString("Name");
-                                            final String t = document.getString("Time");
-                                            final String nu = document.getString("Number");
-                                            final String hn = document.getString("HostName");
-                                            Intent intent = new Intent(Intent.ACTION_SENDTO);
-                                            intent.setData(Uri.parse("mailto:")); // only email apps should handle this
-                                            intent.putExtra(Intent.EXTRA_EMAIL,vem);
-                                            intent.putExtra(Intent.EXTRA_SUBJECT, "Visitor Here!");
-                                            intent.putExtra(Intent.EXTRA_TEXT, "Here are your details and You have checked out at "+ etcheckout.getText()+
-                                                    " \n Name :" +n+"\n Number:"+ nu+"\n" +
-                                                    "Address visited :Innovacer Office \n Checkin time:"+ t+ "\n Host visited:" +hn );
+                        db.collection("Visitor")
+                                .get()
+                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                        if (task.isSuccessful()) {
+                                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                                Log.d(TAG, document.getId() + " => " + document.getData());
+                                                final String vem = document.getString("Email");
+                                                final String n = document.getString("Name");
+                                                final String t = document.getString("Time");
+                                                final String nu = document.get("Number").toString();
+                                                final String hn = document.getString("HostName");
+                                                Intent intent = new Intent(Intent.ACTION_SENDTO);
+                                                intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+                                                intent.putExtra(Intent.EXTRA_EMAIL, vem);
+                                                intent.putExtra(Intent.EXTRA_SUBJECT, "Visitor Here!");
+                                                intent.putExtra(Intent.EXTRA_TEXT, "Here are your details and You have checked out at " + etcheckout.getText() +
+                                                        " \n Name :" + n + "\n Number :" + nu + "\n" +
+                                                        "Address visited : Innovacer Office \n Checkin time : " + t + "\n Host visited : " + hn);
 
 
-                                            if (intent.resolveActivity(getPackageManager()) != null) {
-                                                startActivity(intent);
+                                                if (intent.resolveActivity(getPackageManager()) != null) {
+                                                    startActivity(intent);
+                                                    finish();
+                                                }
+
                                             }
-
                                         }
                                     }
-                                }
-                            });
+                                });
 
+
+                    }
+                });
 
 
             }
-        });
-
-
-    }
-}
+        }

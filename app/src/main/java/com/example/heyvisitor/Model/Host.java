@@ -4,7 +4,7 @@ public class Host {
 
     private String Name;
     private String Email;
-    private int Number;
+    private String Number;
 
 
     public Host(){
@@ -30,13 +30,8 @@ public class Host {
         Email = email;
     }
 
-    public int getNumber() {
-        return Number;
-    }
 
-    public void setNumber(int number) {
-        Number = number;
-    }
+
 
 
 }
